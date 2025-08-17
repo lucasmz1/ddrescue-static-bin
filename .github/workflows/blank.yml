@@ -1,0 +1,76 @@
+name: build
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: 'setup os target'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+          
+      - name: 'build ddrescue'
+        run: |
+          set -eux
+          sudo apt update
+          sudo apt upgrade -y
+          sudo apt install git wget build-essential -y
+          URL="https://download-mirror.savannah.gnu.org/releases/ddrescue/?C=M&O=A"
+          wget -c $URL
+          head -n 80 index.html*? | tail -n 2 | awk '{print $3}' | cut -d ""\" -f 2 | xargs -i -t -exec wget -c -r --no-parent -np -l 1 -A "*.lz" -erobots=off -P . "https://download-mirror.savannah.gnu.org/releases/ddrescue/{}"
+          find ${GITHUB_WORKSPACE} -name '*.lz' | xargs -i -t -exec mv {} ${GITHUB_WORKSPACE}
+          tar xvf ddrescue-*.lz && cd ddrescue*/
+          mkdir -p ${GITHUB_WORKSPACE}/install
+          ./configure --prefix=${GITHUB_WORKSPACE}/install CFLAGS="-O2" LDFLAGS="-static"
+          make
+          make install
+          cd ${GITHUB_WORKSPACE}
+          tar -cJf ddrescue-static.tar.xz install/
+          mkdir dist/
+          mv ddrescue-static.tar.xz dist/
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'ddrescue place'
+          path: 'dist/*tar.xz'
+
+  release:
+    needs: [build]
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download proot artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ddrescue place
+
+      - name: Delete Previous Release
+        run: |
+          gh release delete "${APP_VERSION}" --repo "${GITHUB_REPOSITORY}" --cleanup-tag -y || echo "No release to delete"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Continuous universal"
+          tag_name: continuous-universal
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          make_latest: true
+          files: |
+            *.tar.xz*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
