@@ -18,12 +18,12 @@ jobs:
           echo $PATH
           set -eux
           sudo apt update
-          sudo apt install git wget build-essential -y
+          sudo apt install git wget build-essential lzip -y
           URL="https://download-mirror.savannah.gnu.org/releases/ddrescue/?C=M&O=A"
           wget -c $URL
           head -n 80 index.html*? | tail -n 2 | awk '{print $3}' | cut -d ""\" -f 2 | xargs -i -t -exec wget -c -r --no-parent -np -l 1 -A "*.lz" -erobots=off -P . "https://download-mirror.savannah.gnu.org/releases/ddrescue/{}"
           find ${GITHUB_WORKSPACE} -name '*.lz' | xargs -i -t -exec mv {} ${GITHUB_WORKSPACE}
-          tar --lzip xvf ddrescue-*.lz && cd ddrescue*/
+          tar --lzip -xvf ddrescue-*.lz && cd ddrescue*/
           mkdir -p ${GITHUB_WORKSPACE}/install
           ./configure --prefix=${GITHUB_WORKSPACE}/install CFLAGS="-O2" LDFLAGS="-static"
           make
