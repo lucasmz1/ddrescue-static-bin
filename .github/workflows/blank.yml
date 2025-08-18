@@ -18,7 +18,6 @@ jobs:
           echo $PATH
           set -eux
           sudo apt update
-          sudo apt upgrade -y
           sudo apt install git wget build-essential -y
           URL="https://download-mirror.savannah.gnu.org/releases/ddrescue/?C=M&O=A"
           wget -c $URL
