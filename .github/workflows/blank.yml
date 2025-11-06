@@ -15,10 +15,8 @@ jobs:
           
       - name: 'build ddrescue'
         run: |
-          echo $PATH
-          set -eux
           sudo apt update
-          sudo apt install git wget build-essential lzip -y
+          sudo apt install git wget build-essential lzip binutils -y
           URL="https://gnu.c3sl.ufpr.br/ftp/ddrescue/?C=M;O=D"
           wget -c $URL
           head -n 13 index.html* | tail -n 1 | awk '{print $6}' | cut -d ""\" -f 2 | xargs -i -t -exec wget -c -r --no-parent -np -l 1 -A "*.lz" -erobots=off -P . "https://gnu.c3sl.ufpr.br/ftp/ddrescue/{}"
@@ -28,6 +26,7 @@ jobs:
           ./configure --prefix=${GITHUB_WORKSPACE}/install CFLAGS="-O2" LDFLAGS="-static"
           make
           make install
+          strip ${GITHUB_WORKSPACE}/install/bin/*
           cd ${GITHUB_WORKSPACE}
           tar -cJf ddrescue-static.tar.xz install/
           mkdir dist/
