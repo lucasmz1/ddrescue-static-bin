@@ -15,6 +15,7 @@ jobs:
           
       - name: 'build ddrescue'
         run: |
+          echo $PATH
           sudo apt update
           sudo apt install git wget build-essential lzip binutils -y
           URL="https://gnu.c3sl.ufpr.br/ftp/ddrescue/?C=M;O=D"
