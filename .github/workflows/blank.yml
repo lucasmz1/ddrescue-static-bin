@@ -18,9 +18,8 @@ jobs:
           echo $PATH
           sudo apt update
           sudo apt install git wget build-essential lzip binutils -y
-          URL="https://gnu.c3sl.ufpr.br/ftp/ddrescue/?C=M;O=D"
+          URL="https://gnu.c3sl.ufpr.br/ftp/ddrescue/ddrescue-1.30.tar.lz"
           wget -c $URL
-          head -n 13 index.html* | tail -n 1 | awk '{print $6}' | cut -d ""\" -f 2 | xargs -i -t -exec wget -c -r --no-parent -np -l 1 -A "*.lz" -erobots=off -P . "https://gnu.c3sl.ufpr.br/ftp/ddrescue/{}"
           find ${GITHUB_WORKSPACE} -name '*.lz' | xargs -i -t -exec mv {} ${GITHUB_WORKSPACE}
           tar --lzip -xvf ddrescue-*.lz && cd ddrescue*/
           mkdir -p ${GITHUB_WORKSPACE}/install
