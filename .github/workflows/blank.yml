@@ -20,7 +20,7 @@ jobs:
           sudo apt install git wget build-essential lzip binutils -y
           URL="https://gnu.c3sl.ufpr.br/ftp/ddrescue/ddrescue-1.30.tar.lz"
           wget -c $URL
-          find ${GITHUB_WORKSPACE} -name '*.lz' | xargs -i -t -exec mv {} ${GITHUB_WORKSPACE}
+          #find ${GITHUB_WORKSPACE} -name '*.lz' | xargs -i -t -exec mv {} ${GITHUB_WORKSPACE}
           tar --lzip -xvf ddrescue-*.lz && cd ddrescue*/
           mkdir -p ${GITHUB_WORKSPACE}/install
           ./configure --prefix=${GITHUB_WORKSPACE}/install CFLAGS="-O2" LDFLAGS="-static"
